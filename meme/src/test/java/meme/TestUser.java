@@ -21,8 +21,8 @@ import tank.meme.service.IUserService;
  */
 @ContextConfiguration(locations = { "classpath:spring-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
-@Configuration
-@EnableAutoConfiguration
+//@Configuration
+//@EnableAutoConfiguration
 public class TestUser {
 
 	@Autowired
