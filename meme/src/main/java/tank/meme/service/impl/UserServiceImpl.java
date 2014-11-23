@@ -1,5 +1,10 @@
 package tank.meme.service.impl;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,8 +21,19 @@ import tank.meme.service.IUserService;
  */
 @Service
 public class UserServiceImpl implements IUserService {
+	Logger logger=LoggerFactory.getLogger(UserServiceImpl.class);
 	@Autowired
 	IUserRepository userRepository;
+	
+	@PostConstruct
+	public void init(){
+		logger.info("构造函数初始化后执行");
+	}
+	@PreDestroy
+	public void destroy(){
+		logger.info("销毁之前调用");
+	}
+	 
 
 	/* (non-Javadoc)
 	 * @see tank.meme.service.impl.IUserService#login(java.lang.String, java.lang.String)
