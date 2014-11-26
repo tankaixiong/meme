@@ -17,14 +17,29 @@ public class SessionManager {
 
 	private Logger logger = LoggerFactory.getLogger(SessionManager.class);
 
+	private static SessionManager sessionManager;
+
+	private SessionManager() {
+
+	}
+
+	public static SessionManager getInstance() {
+		if (sessionManager == null) {
+			synchronized (SessionManager.class) {
+				if (sessionManager == null) {
+					sessionManager = new SessionManager();
+				}
+			}
+		}
+		return sessionManager;
+	}
+
 	/**
-	 * 所有在线连接
-	 * sessionId,session
+	 * 所有在线连接 sessionId,session
 	 */
 	private Map<Long, SocketSession> sessionMap = new ConcurrentHashMap<Long, SocketSession>();
 	/**
-	 * 用户与session的关联关系
-	 * userId,session
+	 * 用户与session的关联关系 userId,session
 	 */
 	private Map<Long, SocketSession> userSessionMap = new ConcurrentHashMap<Long, SocketSession>();
 
@@ -51,7 +66,9 @@ public class SessionManager {
 		SocketSession session = sessionMap.get(sessionId);
 
 		Long userId = (Long) session.getAttribute(USER_ID_Key);
-		userSessionMap.remove(userId);
+		if (userId != null) {
+			userSessionMap.remove(userId);
+		}
 
 		session.removeAttribute(USER_Key);// 移除session中的user信息
 		session.removeAttribute(USER_ID_Key);
