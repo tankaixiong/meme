@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.ContextStoppedEvent;
 import org.springframework.context.support.AbstractApplicationContext;
 
 /**
@@ -14,9 +13,8 @@ import org.springframework.context.support.AbstractApplicationContext;
  * @description:
  * @version :1.0
  */
-public class Application implements ApplicationListener<ApplicationEvent> {
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(Application.class);
+public class Application implements ApplicationListener<ContextClosedEvent> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
 	private Application() {
 
@@ -24,6 +22,10 @@ public class Application implements ApplicationListener<ApplicationEvent> {
 
 	private static Application application;
 	private AbstractApplicationContext appContext;
+
+	public AbstractApplicationContext getApplicationContext() {
+		return this.appContext;
+	}
 
 	public static Application getInstance() {
 		if (application == null) {
@@ -41,12 +43,18 @@ public class Application implements ApplicationListener<ApplicationEvent> {
 		this.appContext.addApplicationListener(this);
 	}
 
-	public void onApplicationEvent(ApplicationEvent event) {
-		if(event instanceof ContextClosedEvent){
-			LOGGER.info("spring close 程序");
-		}else if(event instanceof ContextStoppedEvent){
-			LOGGER.info("spring stop 程序");
-		}
-		
+	@Override
+	public void onApplicationEvent(ContextClosedEvent event) {
+		LOGGER.info("spring close 程序");
+		// TODO:销毁资源
+	}
+
+	/**
+	 * 发布事件
+	 * 
+	 * @param event
+	 */
+	public void publishEvent(ApplicationEvent event) {
+		this.appContext.publishEvent(event);
 	}
 }

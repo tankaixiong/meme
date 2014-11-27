@@ -7,8 +7,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 import tank.meme.cache.RedisSupport;
+import tank.meme.core.Application;
+import tank.meme.core.Constant;
+import tank.meme.core.event.SessionCloseEvent;
+import tank.meme.core.event.SessionOpenedEvent;
 import tank.meme.core.net.socket.SocketSession;
+import tank.meme.utils.JsonUtils;
 
 /**
  * @author tank
@@ -29,9 +36,8 @@ public class DefaultServerSocketHandler extends IoHandlerAdapter {
 	public void sessionOpened(IoSession session) throws Exception {
 		LOGGER.trace("session Opened");
 		session.getConfig().setIdleTime(IdleStatus.BOTH_IDLE, 120);
-		// 加入session管理
-		tank.meme.core.net.socket.SessionManager.getInstance().addSession(new SocketSession(session));
-		// TODO:这里定义 event事件进行触发相关监听
+
+		Application.getInstance().publishEvent(new SessionOpenedEvent("sessionOpened", new SocketSession(session)));
 
 		super.sessionOpened(session);
 
@@ -45,7 +51,7 @@ public class DefaultServerSocketHandler extends IoHandlerAdapter {
 		LOGGER.trace("session Closed");
 		tank.meme.core.net.socket.SessionManager.getInstance().removeSessionBySessionId(session.getId());
 		// TODO:这里定义 event事件进行触发相关监听
-
+		Application.getInstance().publishEvent(new SessionCloseEvent("sessionClosed", new SocketSession(session)));
 		super.sessionClosed(session);
 	}
 
@@ -78,14 +84,18 @@ public class DefaultServerSocketHandler extends IoHandlerAdapter {
 	 */
 	@Override
 	public void messageReceived(IoSession session, Object message) throws Exception {
-		
-		LOGGER.trace("message Received:{}",message);
+
+		LOGGER.trace("message Received:{}", message);
 
 		// 这里存到redis列队中进行处理
 
-		String llistKeyString = "msl_" + (session.getId() % QUEUE_NUM);
+		String llistKeyString = Constant.MSG_PRE + (session.getId() % QUEUE_NUM);
 
-		//RedisSupport.getInstance().lpush(llistKeyString, (String) message);
+		ArrayNode node = JsonUtils.objectMapper.createArrayNode();
+		node.add(session.getId());
+		node.add(String.valueOf(message));
+
+		RedisSupport.getInstance().rpush(llistKeyString, node.toString());
 
 	}
 

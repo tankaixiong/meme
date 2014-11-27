@@ -28,6 +28,10 @@ public class User extends AbstractPersistable<Long> implements Serializable {
 
 	private Date createTime;
 
+	public User() {
+
+	}
+
 	public String getName() {
 		return name;
 	}

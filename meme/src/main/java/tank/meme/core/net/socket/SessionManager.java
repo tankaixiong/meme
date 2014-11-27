@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tank.meme.core.Constant;
+
 /**
  * @author tank
  * @date:26 Nov 2014 10:04:58
@@ -43,11 +45,13 @@ public class SessionManager {
 	 */
 	private Map<Long, SocketSession> userSessionMap = new ConcurrentHashMap<Long, SocketSession>();
 
-	/**
-	 * session中存储的用户对象的key
-	 */
-	private static String USER_Key = "_u_key";
-	private static String USER_ID_Key = "_u_id_key";
+	public SocketSession getSession(Long sessionId) {
+		return sessionMap.get(sessionId);
+	}
+
+	public SocketSession getSessionByUserId(Long userId) {
+		return userSessionMap.get(userId);
+	}
 
 	public void addSession(SocketSession session) {
 		sessionMap.put(session.getId(), session);
@@ -56,8 +60,8 @@ public class SessionManager {
 	public void addUser(Object user, Long userId, Long sessionId) {
 		// 用户对象放入session中
 		SocketSession session = sessionMap.get(sessionId);
-		session.setAttribute(USER_ID_Key, userId);
-		session.setAttribute(USER_Key, user);
+		session.setAttribute(Constant.USER_ID_Key, userId);
+		session.setAttribute(Constant.USER_Key, user);
 		// 建立user与session的关联关系
 		userSessionMap.put(userId, session);
 	}
@@ -65,13 +69,13 @@ public class SessionManager {
 	public void removeSessionBySessionId(Long sessionId) {
 		SocketSession session = sessionMap.get(sessionId);
 
-		Long userId = (Long) session.getAttribute(USER_ID_Key);
+		Long userId = (Long) session.getAttribute(Constant.USER_ID_Key);
 		if (userId != null) {
 			userSessionMap.remove(userId);
 		}
 
-		session.removeAttribute(USER_Key);// 移除session中的user信息
-		session.removeAttribute(USER_ID_Key);
+		session.removeAttribute(Constant.USER_Key);// 移除session中的user信息
+		session.removeAttribute(Constant.USER_ID_Key);
 
 		sessionMap.remove(sessionId);
 	}
@@ -81,8 +85,8 @@ public class SessionManager {
 
 		userSessionMap.remove(userId);
 
-		session.removeAttribute(USER_Key);// 移除session中的user信息
-		session.removeAttribute(USER_ID_Key);
+		session.removeAttribute(Constant.USER_Key);// 移除session中的user信息
+		session.removeAttribute(Constant.USER_ID_Key);
 
 		sessionMap.remove(session.getId());
 	}

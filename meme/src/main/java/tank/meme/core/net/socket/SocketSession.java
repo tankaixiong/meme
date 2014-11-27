@@ -2,6 +2,8 @@ package tank.meme.core.net.socket;
 
 import org.apache.mina.core.session.IoSession;
 
+import tank.meme.core.Constant;
+
 /**
  * @author tank
  * @date:26 Nov 2014 10:06:12
@@ -51,6 +53,21 @@ public class SocketSession {
 		if (minaIoSession != null) {
 			minaIoSession.removeAttribute(key);
 		}
+	}
+	/**
+	 * 得到session中用户对象
+	 * @param userId
+	 * @param cs
+	 * @return
+	 */
+	public <T> T getUser(Class<T> cs) {
+		Object obj = getAttribute(Constant.USER_Key);
+		return (T) obj;
+	}
+
+	public Object getUser() {
+		Object obj = getAttribute(Constant.USER_Key);
+		return obj;
 	}
 
 }

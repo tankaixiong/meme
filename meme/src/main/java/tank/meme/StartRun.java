@@ -7,6 +7,7 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import tank.meme.core.Application;
+import tank.meme.core.event.LoginEvent;
 
 /**
  * 程序入口类
@@ -19,26 +20,25 @@ public class StartRun {
 
 	public static void main(String[] args) {
 
-		final AbstractApplicationContext ctx = new ClassPathXmlApplicationContext(
-				"classpath:spring-context.xml");
+		final AbstractApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:spring-context.xml");
 		ctx.registerShutdownHook();
 
-		ctx.start();
-		
+		//ctx.start();
+
 		// 初始化
-		Application.getInstance().init(ctx); 
+		Application.getInstance().init(ctx);
 
 		logger.info("添加JVM关闭hook!");
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
 				logger.info("程序关闭");
-				ctx.stop();
+				//ctx.stop();
+				ctx.close();
 			}
 		});
-		
-		
-		 
+
+		System.exit(0);
 	}
 
 }

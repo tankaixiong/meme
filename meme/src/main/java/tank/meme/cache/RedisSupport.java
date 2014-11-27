@@ -137,20 +137,6 @@ public class RedisSupport {
 		}
 	}
 
-	public void lpushRtbLog(String key, String value) {
-		Jedis jedis = getJedis();
-		try {
-			jedis.lpush(key, value);
-			jedis.lpush(key + "_log", value);
-			jedis.ltrim(key + "_log", 0, 19999);
-		} catch (Exception e) {
-			logger.error("{}", e);
-			returnBrokenResource(jedis);
-		} finally {
-			returnResource(jedis);
-		}
-	}
-
 	public void rpush(String key, String value) {
 		Jedis jedis = getJedis();
 		try {
