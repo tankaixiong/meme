@@ -27,7 +27,7 @@ import tank.meme.utils.JsonUtils;
 public class DefaultServerSocketHandler extends IoHandlerAdapter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultServerSocketHandler.class);
 
-	private static final int QUEUE_NUM = 4;
+	private static final int QUEUE_NUM = Application.getInstance().getThreadNum();
 
 	/**
 	 * 当一个客户端连接进入时

@@ -1,11 +1,16 @@
 package tank.meme.core;
 
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.AbstractApplicationContext;
+
+import tank.meme.core.event.ApplicationAfterStartEvent;
 
 /**
  * @author tank
@@ -16,12 +21,21 @@ import org.springframework.context.support.AbstractApplicationContext;
 public class Application implements ApplicationListener<ContextClosedEvent> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
+	private static Application application;
+	private AbstractApplicationContext appContext;
+	private PropertiesConfiguration propertiesConfiguration = null;
+
 	private Application() {
 
 	}
 
-	private static Application application;
-	private AbstractApplicationContext appContext;
+	public void loadConfig() {
+		try {
+			propertiesConfiguration = new PropertiesConfiguration("application.properties");
+		} catch (ConfigurationException e) {
+			LOGGER.error("没有找到默认配置文件application.properties:{}", e);
+		}
+	}
 
 	public AbstractApplicationContext getApplicationContext() {
 		return this.appContext;
@@ -41,6 +55,27 @@ public class Application implements ApplicationListener<ContextClosedEvent> {
 	public void init(AbstractApplicationContext appContext) {
 		this.appContext = appContext;
 		this.appContext.addApplicationListener(this);
+		//加载application.properties配置文件
+		loadConfig();
+		
+		appContext.publishEvent(new ApplicationAfterStartEvent("appstarted"));
+	}
+
+	public PropertiesConfiguration getProperties() {
+		return propertiesConfiguration;
+	}
+
+	/**
+	 * 执行用户列表的线程数
+	 * 
+	 * @return
+	 */
+	public int getThreadNum() {
+		if (propertiesConfiguration != null) {
+			return propertiesConfiguration.getInt("msg.thread.num");
+		} else {
+			return Runtime.getRuntime().availableProcessors() + 1;
+		}
 	}
 
 	@Override

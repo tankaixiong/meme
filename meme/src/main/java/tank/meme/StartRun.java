@@ -37,6 +37,8 @@ public class StartRun {
 				ctx.close();
 			}
 		});
+		
+		Application.getInstance().getProperties().getString("socket.maxConnections");
 
 		System.exit(0);
 	}
