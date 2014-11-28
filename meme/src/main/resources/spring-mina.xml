@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:task="http://www.springframework.org/schema/task" xmlns:redis="http://www.springframework.org/schema/redis"
-	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
-	xmlns:ehcache="http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:task="http://www.springframework.org/schema/task" xmlns:redis="http://www.springframework.org/schema/redis" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:ehcache="http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans	
 		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 		http://www.springframework.org/schema/task
@@ -22,8 +20,7 @@
 	<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
 		<property name="customEditors">
 			<map>
-				<entry key="java.net.SocketAddress"
-					value="org.apache.mina.integration.beans.InetSocketAddressEditor" />
+				<entry key="java.net.SocketAddress" value="org.apache.mina.integration.beans.InetSocketAddressEditor" />
 				<entry key="java.nio.charset.Charset" value="tank.meme.core.net.socket.mina.CharsetEditor" />
 
 			</map>
@@ -33,13 +30,11 @@
 	<!-- 线程 -->
 	<bean id="executorFilter" class="org.apache.mina.filter.executor.ExecutorFilter">
 		<constructor-arg>
-			<bean id="threadPool" class="java.util.concurrent.Executors"
-				factory-method="newCachedThreadPool" />
+			<bean id="threadPool" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" />
 		</constructor-arg>
 	</bean>
 
-	<!-- log4j 的mdc功能，把你要记录的信息加入到log4j日志中 选项有 handlerClass, remoteAddress, localAddress, 
-		remoteIp, remotePort, localIp, localPort -->
+	<!-- log4j 的mdc功能，把你要记录的信息加入到log4j日志中 选项有 handlerClass, remoteAddress, localAddress, remoteIp, remotePort, localIp, localPort -->
 	<bean id="mdcInjectionFilter" class="org.apache.mina.filter.logging.MdcInjectionFilter">
 		<constructor-arg>
 			<set>
@@ -66,8 +61,7 @@
 
 	<bean id="iPFilter" class="tank.meme.core.net.socket.mina.IPFilter" />
 
-	<bean id="defaultFilterChainBuilder"
-		class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder">
+	<bean id="defaultFilterChainBuilder" class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder">
 		<property name="filters">
 			<map>
 				<entry key="IPFilter" value-ref="iPFilter" />
@@ -87,8 +81,7 @@
 		</constructor-arg>
 	</bean>
 
-	<bean id="policyChainBuilder"
-		class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder">
+	<bean id="policyChainBuilder" class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder">
 		<property name="filters">
 			<map>
 				<entry key="codecFilter" value-ref="policyCodecFactory" />
@@ -99,33 +92,39 @@
 	</bean>
 
 
-	<bean id="policyAcceptor" class="org.apache.mina.transport.socket.nio.NioSocketAcceptor"
-		destroy-method="unbind">
+	<bean id="policyAcceptor" class="org.apache.mina.transport.socket.nio.NioSocketAcceptor" destroy-method="unbind">
 		<property name="defaultLocalAddress" value=":843" />
 		<property name="handler" ref="policyFileHandler" />
 		<property name="reuseAddress" value="true" />
 		<property name="filterChainBuilder" ref="policyChainBuilder" />
 	</bean>
 
-	<!-- http相关 <bean id="httpServerCodec" class="org.apache.mina.http.HttpServerCodec"></bean> 
-		<bean id="httpFilterChainBuilder" class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder"> 
-		<property name="filters"> <map> <entry key="codecFilter" value-ref="httpServerCodec" 
-		/> <entry key="executor" value-ref="executorFilter" /> <entry key="mdcInjectionFilter" 
-		value-ref="mdcInjectionFilter" /> </map> </property> </bean> <bean id="httpSocketAcceptor" 
-		class="org.apache.mina.transport.socket.nio.NioSocketAcceptor" init-method="bind" 
-		destroy-method="unbind"> <property name="defaultLocalAddress" value=":80" 
-		/> <property name="handler" ref="httpHandlerAdapter" /> <property name="reuseAddress" 
-		value="true" /> <property name="filterChainBuilder" ref="httpFilterChainBuilder" 
-		/> </bean> -->
-
 	<!-- 默认的Socket消息接收者,用于接收进入的消息请求(Incoming Message) -->
-	<bean id="defaultSocketAcceptor" class="org.apache.mina.transport.socket.nio.NioSocketAcceptor"
-		init-method="bind" destroy-method="unbind">
+	<bean id="defaultSocketAcceptor" class="org.apache.mina.transport.socket.nio.NioSocketAcceptor" init-method="bind" destroy-method="unbind">
 		<property name="defaultLocalAddress" value=":8888" />
 		<property name="handler" ref="defaultServerSocketHandler" />
 		<property name="reuseAddress" value="true" />
 		<property name="filterChainBuilder" ref="defaultFilterChainBuilder" />
 		<!-- <property name="backlog" value="100" /> -->
 	</bean>
+
+	<!-- http相关 -->
+	<bean id="httpServerCodec" class="org.apache.mina.http.HttpServerCodec"></bean>
+	<bean id="httpFilterChainBuilder" class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder">
+		<property name="filters">
+			<map>
+				<entry key="codecFilter" value-ref="httpServerCodec" />
+				<entry key="executor" value-ref="executorFilter" />
+				<entry key="mdcInjectionFilter" value-ref="mdcInjectionFilter" />
+			</map>
+		</property>
+	</bean>
+	<bean id="httpSocketAcceptor" class="org.apache.mina.transport.socket.nio.NioSocketAcceptor" init-method="bind" destroy-method="unbind">
+		<property name="defaultLocalAddress" value=":80" />
+		<property name="handler" ref="httpHandlerAdapter" />
+		<property name="reuseAddress" value="true" />
+		<property name="filterChainBuilder" ref="httpFilterChainBuilder" />
+	</bean>
+
 
 </beans>
