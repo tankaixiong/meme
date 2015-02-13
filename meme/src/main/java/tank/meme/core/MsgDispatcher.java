@@ -58,7 +58,7 @@ public class MsgDispatcher implements ApplicationListener<ApplicationAfterStartE
 			try {
 				while (true) {
 					try {
-						List<String> list = RedisSupport.getInstance().blpop(Constant.MSG_PRE + threadId);
+						List<String> list = RedisSupport.getInstance().blpop(Application.getInstance().getQueueKey(threadId));
 						if (list != null && !list.isEmpty()) {
 							Long sessionId = Long.parseLong(list.get(0));
 							String json = list.get(1);

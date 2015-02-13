@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 
 import tank.meme.core.net.socket.Protocol;
 import tank.meme.utils.EncryptUtils;
+import tank.meme.utils.GzipUtils;
 import tank.meme.utils.JsonUtils;
-import tank.meme.utils.ZipUtils;
 
 /**
  * 数据通信编码
@@ -45,7 +45,7 @@ public class JsonEncoder implements ProtocolEncoder {
 			
 			// byte bytes[] = compress(session, responseJson.getBytes("UTF-8"));
 			// // 压缩数据
-			byte bytes[] = ZipUtils.jzlib(responseJson.getBytes("UTF-8")); // 压缩数据
+			byte bytes[] = GzipUtils.compress(responseJson.getBytes("UTF-8")); // 压缩数据
 			
 			int dataLength = bytes.length;
 			buffer = IoBuffer.allocate(dataLength + 8, false);// 这个长度是前面8个字节

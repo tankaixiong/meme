@@ -1,6 +1,5 @@
 package tank.meme.core;
 
-import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.slf4j.Logger;
@@ -25,6 +24,8 @@ public class Application implements ApplicationListener<ContextClosedEvent> {
 	private AbstractApplicationContext appContext;
 	private PropertiesConfiguration propertiesConfiguration = null;
 
+	public static int serverId = -1;
+
 	private Application() {
 
 	}
@@ -32,6 +33,7 @@ public class Application implements ApplicationListener<ContextClosedEvent> {
 	public void loadConfig() {
 		try {
 			propertiesConfiguration = new PropertiesConfiguration("application.properties");
+			serverId = propertiesConfiguration.getInt("server.id");
 		} catch (ConfigurationException e) {
 			LOGGER.error("没有找到默认配置文件application.properties:{}", e);
 		}
@@ -55,9 +57,9 @@ public class Application implements ApplicationListener<ContextClosedEvent> {
 	public void init(AbstractApplicationContext appContext) {
 		this.appContext = appContext;
 		this.appContext.addApplicationListener(this);
-		//加载application.properties配置文件
+		// 加载application.properties配置文件
 		loadConfig();
-		
+
 		appContext.publishEvent(new ApplicationAfterStartEvent("appstarted"));
 	}
 
@@ -76,6 +78,15 @@ public class Application implements ApplicationListener<ContextClosedEvent> {
 		} else {
 			return Runtime.getRuntime().availableProcessors() + 1;
 		}
+	}
+	/**
+	 *  得到线程key
+	 * @param threadNum
+	 * @return
+	 */
+	public String getQueueKey(int threadNum) {
+		String key = Constant.MSG_PRE + Application.serverId + ":" + threadNum;
+		return key;
 	}
 
 	@Override

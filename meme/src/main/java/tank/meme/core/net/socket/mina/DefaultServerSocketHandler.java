@@ -76,7 +76,7 @@ public class DefaultServerSocketHandler extends IoHandlerAdapter {
 	public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
 
 		LOGGER.info("空闲!自动断开");
-		session.close(true);
+		//session.close(true);
 	}
 
 	/**
@@ -88,8 +88,8 @@ public class DefaultServerSocketHandler extends IoHandlerAdapter {
 		LOGGER.trace("message Received:{}", message);
 
 		// 这里存到redis列队中进行处理
-
-		String llistKeyString = Constant.MSG_PRE + (session.getId() % QUEUE_NUM);
+		//String llistKeyString = Constant.MSG_PRE +Application.serverId+":"+ (session.getId() % QUEUE_NUM);
+		String llistKeyString =Application.getInstance().getQueueKey((int)(session.getId() % QUEUE_NUM));
 
 		ArrayNode node = JsonUtils.objectMapper.createArrayNode();
 		node.add(session.getId());

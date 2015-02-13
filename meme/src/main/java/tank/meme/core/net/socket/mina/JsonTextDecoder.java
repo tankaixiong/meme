@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tank.meme.utils.EncryptUtils;
-import tank.meme.utils.ZipUtils;
+import tank.meme.utils.GzipUtils;
 
 /**
  * JSON解码类
@@ -86,7 +86,7 @@ public class JsonTextDecoder extends CumulativeProtocolDecoder {
 							// 解密
 							byte[] unencrypt = EncryptUtils.encrypt(data);
 							// 解压缩
-							byte[] uncompass = ZipUtils.unjzlib(unencrypt);
+							byte[] uncompass = GzipUtils.uncompress(unencrypt);
 
 							if (uncompass != null) {
 								String jsonStr = new String(uncompass, "UTF-8");

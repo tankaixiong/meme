@@ -8,7 +8,7 @@ package tank.meme.utils;
  */
 public class EncryptUtils {
 
-	public static final String[] KEYS = { "java/slime", "songjiang ledu road no.251,ledu build,11D/E" };
+	public static final String[] KEYS = { "j/tank", "T90A3n,11D/GiveYouSomeColorToSee" };
 
 	public static byte[] encrypt(byte[] _bytes) { //	与或~ 打乱byte
 		byte[] _enBytes = new byte[_bytes.length];

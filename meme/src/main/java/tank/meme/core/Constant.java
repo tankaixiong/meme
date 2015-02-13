@@ -13,5 +13,5 @@ public class Constant {
 	public static String USER_Key = "_u_key";
 	public static String USER_ID_Key = "_u_id_key";
 
-	public static String MSG_PRE = "msl_";
+	public static String MSG_PRE = "msl:";
 }
