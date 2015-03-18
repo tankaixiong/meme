@@ -2,7 +2,7 @@ package tank.meme.core.net.socket;
 
 import org.apache.mina.core.session.IoSession;
 
-import tank.meme.core.Constant;
+import tank.meme.core.constant.SessionConstant;
 
 /**
  * @author tank
@@ -61,12 +61,12 @@ public class SocketSession {
 	 * @return
 	 */
 	public <T> T getUser(Class<T> cs) {
-		Object obj = getAttribute(Constant.USER_Key);
+		Object obj = getAttribute(SessionConstant.USER_Key);
 		return (T) obj;
 	}
 
 	public Object getUser() {
-		Object obj = getAttribute(Constant.USER_Key);
+		Object obj = getAttribute(SessionConstant.USER_Key);
 		return obj;
 	}
 

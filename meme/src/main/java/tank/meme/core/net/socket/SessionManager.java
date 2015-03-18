@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tank.meme.core.Constant;
+import tank.meme.core.constant.SessionConstant;
 
 /**
  * @author tank
@@ -60,8 +60,8 @@ public class SessionManager {
 	public void addUser(Object user, Long userId, Long sessionId) {
 		// 用户对象放入session中
 		SocketSession session = sessionMap.get(sessionId);
-		session.setAttribute(Constant.USER_ID_Key, userId);
-		session.setAttribute(Constant.USER_Key, user);
+		session.setAttribute(SessionConstant.USER_ID_Key, userId);
+		session.setAttribute(SessionConstant.USER_Key, user);
 		// 建立user与session的关联关系
 		userSessionMap.put(userId, session);
 	}
@@ -69,13 +69,13 @@ public class SessionManager {
 	public void removeSessionBySessionId(Long sessionId) {
 		SocketSession session = sessionMap.get(sessionId);
 
-		Long userId = (Long) session.getAttribute(Constant.USER_ID_Key);
+		Long userId = (Long) session.getAttribute(SessionConstant.USER_ID_Key);
 		if (userId != null) {
 			userSessionMap.remove(userId);
 		}
 
-		session.removeAttribute(Constant.USER_Key);// 移除session中的user信息
-		session.removeAttribute(Constant.USER_ID_Key);
+		session.removeAttribute(SessionConstant.USER_Key);// 移除session中的user信息
+		session.removeAttribute(SessionConstant.USER_ID_Key);
 
 		sessionMap.remove(sessionId);
 	}
@@ -85,8 +85,8 @@ public class SessionManager {
 
 		userSessionMap.remove(userId);
 
-		session.removeAttribute(Constant.USER_Key);// 移除session中的user信息
-		session.removeAttribute(Constant.USER_ID_Key);
+		session.removeAttribute(SessionConstant.USER_Key);// 移除session中的user信息
+		session.removeAttribute(SessionConstant.USER_ID_Key);
 
 		sessionMap.remove(session.getId());
 	}

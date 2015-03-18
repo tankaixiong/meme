@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.AbstractApplicationContext;
 
+import tank.meme.core.constant.SessionConstant;
 import tank.meme.core.event.ApplicationAfterStartEvent;
 
 /**
@@ -85,7 +86,7 @@ public class Application implements ApplicationListener<ContextClosedEvent> {
 	 * @return
 	 */
 	public String getQueueKey(int threadNum) {
-		String key = Constant.MSG_PRE + Application.serverId + ":" + threadNum;
+		String key = "msl:" + Application.serverId + ":" + threadNum;
 		return key;
 	}
 

@@ -2,6 +2,7 @@ package tank.meme.handler.user;
 
 import org.springframework.stereotype.Controller;
 
+import tank.meme.constant.HandlerType;
 import tank.meme.core.MessageHandler;
 import tank.meme.core.net.socket.Request;
 import tank.meme.core.net.socket.SocketSession;
@@ -17,7 +18,7 @@ public class LoginHandler extends MessageHandler {
 
 	@Override
 	public String getHandlerName() {
-		return "login";
+		return HandlerType.LOGIN;
 	}
 
 	@Override

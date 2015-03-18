@@ -13,9 +13,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import tank.meme.cache.RedisSupport;
 import tank.meme.core.Application;
-import tank.meme.core.Constant;
 import tank.meme.core.QueueMsgDispatcher;
 import tank.meme.core.constant.ApplicationProperties;
+import tank.meme.core.constant.SessionConstant;
 import tank.meme.core.event.SessionCloseEvent;
 import tank.meme.core.event.SessionOpenedEvent;
 import tank.meme.core.net.socket.SocketSession;
