@@ -1,5 +1,7 @@
 package tank.meme.core.net.socket.mina;
 
+import java.util.Queue;
+
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
@@ -12,6 +14,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import tank.meme.cache.RedisSupport;
 import tank.meme.core.Application;
 import tank.meme.core.Constant;
+import tank.meme.core.QueueMsgDispatcher;
+import tank.meme.core.constant.ApplicationProperties;
 import tank.meme.core.event.SessionCloseEvent;
 import tank.meme.core.event.SessionOpenedEvent;
 import tank.meme.core.net.socket.SocketSession;
@@ -28,6 +32,8 @@ public class DefaultServerSocketHandler extends IoHandlerAdapter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultServerSocketHandler.class);
 
 	private static final int QUEUE_NUM = Application.getInstance().getThreadNum();
+	private Application application = Application.getInstance();
+	private Boolean isRedisDispather = null;
 
 	/**
 	 * 当一个客户端连接进入时
@@ -37,7 +43,7 @@ public class DefaultServerSocketHandler extends IoHandlerAdapter {
 		LOGGER.trace("session Opened");
 		session.getConfig().setIdleTime(IdleStatus.BOTH_IDLE, 120);
 
-		Application.getInstance().publishEvent(new SessionOpenedEvent("sessionOpened", new SocketSession(session)));
+		application.publishEvent(new SessionOpenedEvent("sessionOpened", new SocketSession(session)));
 
 		super.sessionOpened(session);
 
@@ -51,7 +57,7 @@ public class DefaultServerSocketHandler extends IoHandlerAdapter {
 		LOGGER.trace("session Closed");
 		tank.meme.core.net.socket.SessionManager.getInstance().removeSessionBySessionId(session.getId());
 		// TODO:这里定义 event事件进行触发相关监听
-		Application.getInstance().publishEvent(new SessionCloseEvent("sessionClosed", new SocketSession(session)));
+		application.publishEvent(new SessionCloseEvent("sessionClosed", new SocketSession(session)));
 		super.sessionClosed(session);
 	}
 
@@ -76,7 +82,7 @@ public class DefaultServerSocketHandler extends IoHandlerAdapter {
 	public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
 
 		LOGGER.info("空闲!自动断开");
-		//session.close(true);
+		// session.close(true);
 	}
 
 	/**
@@ -87,16 +93,35 @@ public class DefaultServerSocketHandler extends IoHandlerAdapter {
 
 		LOGGER.trace("message Received:{}", message);
 
-		// 这里存到redis列队中进行处理
-		//String llistKeyString = Constant.MSG_PRE +Application.serverId+":"+ (session.getId() % QUEUE_NUM);
-		String llistKeyString =Application.getInstance().getQueueKey((int)(session.getId() % QUEUE_NUM));
+		int queueNum = (int) (session.getId() % QUEUE_NUM);
+		// 前8位为SESSION ID 后面才是真正传递的消息
+		String sessionId = String.format("%08d", session.getId());
 
-		ArrayNode node = JsonUtils.objectMapper.createArrayNode();
-		node.add(session.getId());
-		node.add(String.valueOf(message));
+		// 读取配置文件确定采用哪种消息队列分发模式
+		if (isRedisDispather == null) {
+			String queueType = application.getProperties().getString(ApplicationProperties.MSG_QUEUE_TYPE);
+			if ("redis".equals(queueType)) {
+				isRedisDispather = true;
+			} else {
+				isRedisDispather = false;
+			}
+		}
+		if (isRedisDispather) {
+			// 这里存到redis列队中进行处理
+			String redisListKey = application.getQueueKey(queueNum);// 取模得到应该所属列队ID
 
-		RedisSupport.getInstance().rpush(llistKeyString, node.toString());
+			// ArrayNode node = JsonUtils.objectMapper.createArrayNode();
+			// node.add(session.getId());
+			// node.add(String.valueOf(message));
+			// RedisSupport.getInstance().rpush(redisListKey, node.toString());
 
+			RedisSupport.getInstance().rpush(redisListKey, sessionId + String.valueOf(message));
+		} else {
+
+			// 内存列队处理
+			Queue<String> queue = QueueMsgDispatcher.msgQueueMap.get(queueNum);
+			queue.offer(sessionId + String.valueOf(message));
+		}
 	}
 
 	@Override
