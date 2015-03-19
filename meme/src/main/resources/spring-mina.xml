@@ -58,13 +58,15 @@
 	<bean id="jsonCodecFilter" class="org.apache.mina.filter.codec.ProtocolCodecFilter">
 		<constructor-arg ref="jsonCodecFactory" />
 	</bean>
-
+	
+	<!-- ip 过滤，防止一个IP占用过多长连接==>转移到监控中心统一控制
 	<bean id="iPFilter" class="tank.meme.core.net.socket.mina.IPFilter" />
+	 -->
 
 	<bean id="defaultFilterChainBuilder" class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder">
 		<property name="filters">
 			<map>
-				<entry key="IPFilter" value-ref="iPFilter" />
+				<!-- <entry key="IPFilter" value-ref="iPFilter" /> -->
 				<entry key="codecFilter" value-ref="jsonCodecFilter" />
 				<entry key="executor" value-ref="executorFilter" />
 				<entry key="mdcInjectionFilter" value-ref="mdcInjectionFilter" />
@@ -72,7 +74,7 @@
 			</map>
 		</property>
 	</bean>
-	<!-- policy相关 -->
+	<!-- policy相关 
 	<bean id="policyCodecFactory" class="org.apache.mina.filter.codec.ProtocolCodecFilter">
 		<constructor-arg>
 			<bean class="tank.meme.core.net.socket.mina.PolicyCoderFactory">
@@ -98,6 +100,7 @@
 		<property name="reuseAddress" value="true" />
 		<property name="filterChainBuilder" ref="policyChainBuilder" />
 	</bean>
+	-->
 
 	<!-- 默认的Socket消息接收者,用于接收进入的消息请求(Incoming Message) -->
 	<bean id="defaultSocketAcceptor" class="org.apache.mina.transport.socket.nio.NioSocketAcceptor" init-method="bind" destroy-method="unbind">
@@ -108,7 +111,7 @@
 		<!-- <property name="backlog" value="100" /> -->
 	</bean>
 
-	<!-- http相关 -->
+	<!-- http相关 
 	<bean id="httpServerCodec" class="org.apache.mina.http.HttpServerCodec"></bean>
 	<bean id="httpFilterChainBuilder" class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder">
 		<property name="filters">
@@ -124,7 +127,7 @@
 		<property name="handler" ref="httpHandlerAdapter" />
 		<property name="reuseAddress" value="true" />
 		<property name="filterChainBuilder" ref="httpFilterChainBuilder" />
-	</bean>
+	</bean>-->
 
 
 </beans>

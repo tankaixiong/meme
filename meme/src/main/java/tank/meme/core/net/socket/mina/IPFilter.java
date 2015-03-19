@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class IPFilter extends IoFilterAdapter {
 	private Logger log = LoggerFactory.getLogger(IPFilter.class);
-	private static Map<String, Integer> ipList = new ConcurrentHashMap<String, Integer>();
+	private static ConcurrentHashMap<String, Integer> ipList = new ConcurrentHashMap<String, Integer>();
 	private static final String SESSION_IP = "ip";
 	/**
 	 * 一个IP最大可创建的连接数

@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.AbstractApplicationContext;
 
+import tank.meme.core.constant.ApplicationProperties;
 import tank.meme.core.constant.SessionConstant;
 import tank.meme.core.event.ApplicationAfterStartEvent;
 
@@ -34,7 +35,7 @@ public class Application implements ApplicationListener<ContextClosedEvent> {
 	public void loadConfig() {
 		try {
 			propertiesConfiguration = new PropertiesConfiguration("application.properties");
-			serverId = propertiesConfiguration.getInt("server.id");
+			serverId = propertiesConfiguration.getInt(ApplicationProperties.SERVER_ID);
 		} catch (ConfigurationException e) {
 			LOGGER.error("没有找到默认配置文件application.properties:{}", e);
 		}
@@ -75,19 +76,28 @@ public class Application implements ApplicationListener<ContextClosedEvent> {
 	 */
 	public int getThreadNum() {
 		if (propertiesConfiguration != null) {
-			return propertiesConfiguration.getInt("msg.thread.num");
+			return propertiesConfiguration.getInt(ApplicationProperties.MSG_THREAD_NUM);
 		} else {
 			return Runtime.getRuntime().availableProcessors() + 1;
 		}
 	}
+
 	/**
-	 *  得到线程key
+	 * 得到线程key
+	 * 
 	 * @param threadNum
 	 * @return
 	 */
 	public String getQueueKey(int threadNum) {
 		String key = "msl:" + Application.serverId + ":" + threadNum;
 		return key;
+	}
+	/**
+	 * 获得当前服的ID
+	 * @return
+	 */
+	public int getServerId() {
+		return serverId;
 	}
 
 	@Override

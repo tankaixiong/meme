@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import tank.meme.core.Application;
 import tank.meme.domain.User;
 import tank.meme.service.IUserService;
 
@@ -21,8 +22,8 @@ import tank.meme.service.IUserService;
  */
 @ContextConfiguration(locations = { "classpath:spring-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
-//@Configuration
-//@EnableAutoConfiguration
+// @Configuration
+// @EnableAutoConfiguration
 public class TestUser {
 
 	@Autowired
