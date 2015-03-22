@@ -8,6 +8,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import tank.meme.core.Application;
 import tank.meme.core.event.LoginEvent;
+import tank.meme.core.loader.LoaderManger;
 
 /**
  * 程序入口类
@@ -37,6 +38,8 @@ public class StartRun {
 				ctx.close();
 			}
 		});
+		
+		LoaderManger.loadJar();
 		
 		Application.getInstance().getProperties().getString("socket.maxConnections");
 

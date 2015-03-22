@@ -14,7 +14,8 @@ import tank.meme.domain.User;
  * @description:
  * @version :1.0
  */
-public interface IUserRepository extends CrudRepository<User, Long> {
+public interface IUserRepository{
+//extends CrudRepository<User, Long> {
 
 	List<User> findById(String id);
 
@@ -25,4 +26,6 @@ public interface IUserRepository extends CrudRepository<User, Long> {
 
 	@Query("select u from User u where u.name=:name and u.pwd=:pwd ")
 	User getByNameAndPwd(@Param("name") String name, @Param("pwd") String pwd);
+
+	User save(User user);
 }

@@ -2,15 +2,14 @@ package meme;
 
 import java.util.Date;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import tank.meme.core.Application;
+import tank.meme.core.loader.LoaderManger;
 import tank.meme.domain.User;
 import tank.meme.service.IUserService;
 
@@ -31,8 +30,9 @@ public class TestUser {
 
 	@Test
 	public void testSelect() {
-		userServie.login("tank", "tank");
-
+		User user = userServie.login("aaa", "123");
+		Assert.assertNotNull(user);
+		System.out.println(user.getId());
 	}
 
 	@Test
@@ -43,5 +43,10 @@ public class TestUser {
 		user.setPwd("123");
 		userServie.save(user);
 
+	}
+
+	@Test
+	public void loadJar() {
+		LoaderManger.loadJar();
 	}
 }

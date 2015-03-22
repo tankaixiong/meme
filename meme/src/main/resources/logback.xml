@@ -11,7 +11,7 @@
 	</appender>
 
 	<appender name="file-all-in-one" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<File>/${app.log.path}/${app.name}/log.log</File>
+		<File>${user.dir}/logs/log.log</File>
 
 		<encoder charset="UTF-8">
 			<pattern>%d [%thread] %-5level %class{0}[%line] - %msg%n</pattern>

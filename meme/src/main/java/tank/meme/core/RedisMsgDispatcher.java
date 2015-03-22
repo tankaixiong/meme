@@ -18,7 +18,7 @@ import tank.meme.utils.JsonUtils;
  * @description:基于redis 机制的消息分发
  * @version :1.0
  */
-@Component
+//@Component
 public class RedisMsgDispatcher extends BaseMsgDispatcher {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RedisMsgDispatcher.class);
 
@@ -27,11 +27,12 @@ public class RedisMsgDispatcher extends BaseMsgDispatcher {
 	 */
 	@Override
 	public void init() {
+		if (!isDefaultMsgType()) {
+			LOGGER.info("当前线程数:{}", POOL_SIZE);
 
-		LOGGER.info("当前线程数:{}", POOL_SIZE);
-
-		for (int i = 0; i < POOL_SIZE; i++) {
-			pool.execute(new MsgBee(i));
+			for (int i = 0; i < POOL_SIZE; i++) {
+				pool.execute(new MsgBee(i));
+			}
 		}
 	}
 
@@ -50,12 +51,12 @@ public class RedisMsgDispatcher extends BaseMsgDispatcher {
 					try {
 						List<String> list = RedisSupport.getInstance().blpop(Application.getInstance().getQueueKey(threadId));
 						if (list != null && !list.isEmpty()) {
-							//Long key = Long.parseLong(list.get(0));//得到的是reids key
-							
+							// Long key = Long.parseLong(list.get(0));//得到的是reids key
+
 							String data = list.get(1);
-							Long sessionId=Long.parseLong(data.substring(0, 8));
-							String json=data.substring(8);
-							
+							Long sessionId = Long.parseLong(data.substring(0, 8));
+							String json = data.substring(8);
+
 							Request request = JsonUtils.toBean(json, Request.class);
 
 							SocketSession session = SessionManager.getInstance().getSession(sessionId);

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import tank.meme.core.constant.ApplicationProperties;
 import tank.meme.core.event.ApplicationAfterStartEvent;
 
 /**
@@ -30,6 +31,15 @@ public class BaseMsgDispatcher implements ApplicationListener<ApplicationAfterSt
 	protected Map<String, IMessageHandler> messageHandler = new HashMap<String, IMessageHandler>();
 
 	protected ExecutorService pool;
+
+	public boolean isDefaultMsgType() {
+		String queueType = Application.getInstance().getProperties().getString(ApplicationProperties.MSG_QUEUE_TYPE);
+		if ("redis".equals(queueType)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 
 	/**
 	 * 读取线程的列队

@@ -22,7 +22,7 @@ import tank.meme.utils.JsonUtils;
  * @description:基本内存中queue列队的消息分发
  * @version :0.1
  */
-@Component
+//@Component
 public class QueueMsgDispatcher extends BaseMsgDispatcher {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(QueueMsgDispatcher.class);
@@ -30,22 +30,23 @@ public class QueueMsgDispatcher extends BaseMsgDispatcher {
 	public static Map<Integer, Queue<String>> msgQueueMap = new HashMap<Integer, Queue<String>>();
 
 	// private Queue<String> msgQueue = new ConcurrentLinkedQueue<String>();
-	
 
 	/**
 	 * 读取线程的列队
 	 */
 	@Override
 	public void init() {
+		if (isDefaultMsgType()) {
 
-		LOGGER.info("当前线程数:{}", POOL_SIZE);
+			LOGGER.info("当前线程数:{}", POOL_SIZE);
+			for (int i = 0; i < POOL_SIZE; i++) {
+				// 初始化消息列队，消息列队数与线程数一致
+				msgQueueMap.put(i, new ConcurrentLinkedQueue<String>());
 
-		for (int i = 0; i < POOL_SIZE; i++) {
-			// 初始化消息列队，消息列队数与线程数一致
-			msgQueueMap.put(i, new ConcurrentLinkedQueue<String>());
-
-			pool.execute(new MsgBee(i));
+				pool.execute(new MsgBee(i));
+			}
 		}
+
 	}
 
 	private class MsgBee extends Thread {
