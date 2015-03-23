@@ -19,11 +19,11 @@ import org.hibernate.annotations.GenericGenerator;
  */
 @Entity
 @Table(name = "meme_user")
-@GenericGenerator(name = "uuid_u", strategy = "uuid")
+@GenericGenerator(name = "uuid_u", strategy = "uuid2")
 public class User implements Serializable {
 	@Id
 	@GeneratedValue(generator = "uuid_u")
-	@Column(length = 32)
+	@Column(length = 36)
 	private String id;
 
 	private String name;

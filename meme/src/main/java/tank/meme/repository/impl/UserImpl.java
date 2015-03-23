@@ -19,8 +19,8 @@ import tank.meme.repository.IUserRepository;
  * @description:
  * @version :0.1
  */
-@Repository
-public class UserImpl implements IUserRepository {
+//@Repository
+public class UserImpl {/**implements IUserRepository {
 	@PersistenceContext
 	private EntityManager em;
 
@@ -55,6 +55,6 @@ public class UserImpl implements IUserRepository {
 	public User save(User user) {
 		em.persist(user);
 		return user;
-	}
+	}**/
 
 }

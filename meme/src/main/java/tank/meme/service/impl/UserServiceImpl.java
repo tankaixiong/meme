@@ -24,7 +24,7 @@ import tank.meme.service.IUserService;
 @Service
 public class UserServiceImpl implements IUserService {
 	Logger logger=LoggerFactory.getLogger(UserServiceImpl.class);
-	@Resource(name="userImpl")
+	@Resource
 	IUserRepository userRepository;
 	
 	@PostConstruct

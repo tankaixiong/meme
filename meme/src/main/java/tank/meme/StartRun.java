@@ -39,7 +39,8 @@ public class StartRun {
 			}
 		});
 		
-		LoaderManger.loadJar();
+		//LoaderManger.loadJar();
+		LoaderManger.loadServiceJar();
 		
 		Application.getInstance().getProperties().getString("socket.maxConnections");
 

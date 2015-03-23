@@ -10,6 +10,8 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import javax.persistence.Entity;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import tank.meme.core.Application;
+import tank.meme.domain.User;
 import tank.meme.service.IUserService;
 import tank.meme.service.impl.UserServiceImpl;
 
@@ -102,7 +105,7 @@ public class LoaderManger {
 					for (Annotation annotation : annotationArray) {
 						// 判断是否是spring bean对象再注册
 						if (annotation instanceof Repository || annotation instanceof Service || annotation instanceof Controller
-								|| annotation instanceof Component) {
+								|| annotation instanceof Component || annotation instanceof Entity) {
 							registerBean(clazz);
 						}
 					}
@@ -115,8 +118,10 @@ public class LoaderManger {
 		}
 
 	}
+
 	/**
 	 * 手动注册类到spring容器的环境中
+	 * 
 	 * @param clazz
 	 */
 	public static void registerBean(Class clazz) {
@@ -132,8 +137,8 @@ public class LoaderManger {
 
 		messageSourceDefinition.setBeanClass(clazz);
 		// messageSourceDefinition.setPropertyValues(new MutablePropertyValues(original));
-		
-		//String className = clazz.getSimpleName().substring(0, 1).toLowerCase() + clazz.getSimpleName().substring(1);
+
+		// String className = clazz.getSimpleName().substring(0, 1).toLowerCase() + clazz.getSimpleName().substring(1);
 		String className = clazz.getSimpleName();
 		logger.info(className);
 		// 注册
@@ -157,10 +162,46 @@ public class LoaderManger {
 			// urlClassLoader = new URLClassLoader(new URL[] { url });
 
 			parseJarClass(file.getPath());
-
+			// 这里只能用接口接收，不然会报错
 			IUserService service = (IUserService) Application.getInstance().getApplicationContext().getBean("UserServiceImpl");
-			 
-			service.login("aaa", "123");
+
+			User user = service.login("aaa", "123");
+
+			logger.info("用户ID：{},用户名：{}", user.getId(), user.getName());
+
+			// Class clazz = urlClassLoader.loadClass("tank.meme.service.impl.UserServiceImpl");
+			//
+			// Object obj = clazz.newInstance();
+			//
+			// Method login = clazz.getMethod("login", String.class, String.class);
+			//
+			// System.out.println(login.invoke(obj, "aaa", "123"));
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public static void loadServiceJar() {
+
+		try {
+			File file = new File("E:\\eclipse-workspace\\service\\target\\setting-service-0.0.1.jar");
+			URL url = file.toURI().toURL();
+
+			urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+			addUrl(url);
+			// urlClassLoader = new URLClassLoader(new URL[] { url });
+
+			parseJarClass(file.getPath());
+			// 这里只能用接口接收，不然会报错
+			Object service = Application.getInstance().getApplicationContext().getBean("SettingServiceImpl");
+
+			Method method = service.getClass().getMethod("loadEntity", String.class);
+			Object data = method.invoke(service, "aaa");
+
+			logger.info("调用返回结果:{}", data);
 
 			// Class clazz = urlClassLoader.loadClass("tank.meme.service.impl.UserServiceImpl");
 			//
