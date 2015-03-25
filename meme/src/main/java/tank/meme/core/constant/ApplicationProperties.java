@@ -18,5 +18,7 @@ public class ApplicationProperties {
 	public static String SOCKET_MAXCONNECTIONS = "socket.maxConnections";
 	// #服务器ID,集群中唯一
 	public static String SERVER_ID = "server.id";
+	//SDK路径
+	public static String SDK_PATH="sdk.path";
 
 }

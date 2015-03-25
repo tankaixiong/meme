@@ -24,7 +24,7 @@ public class Application implements ApplicationListener<ContextClosedEvent> {
 
 	private static Application application;
 	private AbstractApplicationContext appContext;
-	private PropertiesConfiguration propertiesConfiguration = null;
+	private static PropertiesConfiguration propertiesConfiguration = null;
 
 	public static int serverId = -1;
 
@@ -32,7 +32,7 @@ public class Application implements ApplicationListener<ContextClosedEvent> {
 
 	}
 
-	public void loadConfig() {
+	static {
 		try {
 			propertiesConfiguration = new PropertiesConfiguration("application.properties");
 			serverId = propertiesConfiguration.getInt(ApplicationProperties.SERVER_ID);
@@ -59,8 +59,6 @@ public class Application implements ApplicationListener<ContextClosedEvent> {
 	public void init(AbstractApplicationContext appContext) {
 		this.appContext = appContext;
 		this.appContext.addApplicationListener(this);
-		// 加载application.properties配置文件
-		loadConfig();
 
 		appContext.publishEvent(new ApplicationAfterStartEvent("appstarted"));
 	}
@@ -92,8 +90,10 @@ public class Application implements ApplicationListener<ContextClosedEvent> {
 		String key = "msl:" + Application.serverId + ":" + threadNum;
 		return key;
 	}
+
 	/**
 	 * 获得当前服的ID
+	 * 
 	 * @return
 	 */
 	public int getServerId() {

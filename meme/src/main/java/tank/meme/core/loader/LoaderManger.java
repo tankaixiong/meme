@@ -2,31 +2,31 @@ package tank.meme.core.loader;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import javax.persistence.Entity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import tank.meme.core.Application;
-import tank.meme.domain.User;
-import tank.meme.service.IUserService;
-import tank.meme.service.impl.UserServiceImpl;
+import tank.meme.core.BaseMsgDispatcher;
+import tank.meme.core.IMessageHandler;
+import tank.meme.core.constant.ApplicationProperties;
+import tank.meme.core.event.ApplicationAfterStartEvent;
 
 /**
  * @author tank
@@ -35,13 +35,53 @@ import tank.meme.service.impl.UserServiceImpl;
  * @description:热加载
  * @version :0.1
  */
-
-public class LoaderManger {
+@Component
+public class LoaderManger implements ApplicationListener<ApplicationAfterStartEvent> {
 
 	private static Logger logger = LoggerFactory.getLogger(LoaderManger.class);
 
-	public static void main(String[] args) {
+	/**
+	 * 加载所有的业务JAR到环境中
+	 */
+	public void loadSdkJar() {
+		urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 
+		String sdkPath = Application.getInstance().getProperties().getString(ApplicationProperties.SDK_PATH);
+		sdkPath = sdkPath.replaceAll("////", "\\");
+		File file = new File(sdkPath);
+		if (file.isDirectory()) {
+			File files[] = file.listFiles();
+			for (File f : files) {
+				if (f.isFile()) {
+					try {
+						URL url = f.toURI().toURL();
+						// 加载JAR包
+						addUrl(url);
+						// 注册bean
+						parseJarClass(f.getAbsolutePath());
+
+					} catch (Exception e) {
+						logger.error("{}", e);
+					}
+				}
+			}
+		}
+	}
+	/**
+	 * 重新加载jar，应用于jar的更新
+	 * @param f
+	 */
+	public static void reLoaderJar(File f) {
+		try {
+			URL url = f.toURI().toURL();
+			// 加载JAR包
+			addUrl(url);
+			// 注册bean
+			parseJarClass(f.getAbsolutePath());
+
+		} catch (Exception e) {
+			logger.error("{}", e);
+		}
 	}
 
 	/**
@@ -64,29 +104,16 @@ public class LoaderManger {
 			} finally {
 				method.setAccessible(accessible);
 			}
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("{}", e);
 		}
 	}
 
 	/**
-	 * 
+	 * 解析jar中的class并注册到spring环境中
 	 */
 	public static void parseJarClass(String jarPath) {
-
+		Set<String> handlerBeanName = new HashSet<String>();
 		try {
 			JarFile jarFile = new JarFile(jarPath);
 			Enumeration<JarEntry> entrys = jarFile.entries();
@@ -100,13 +127,20 @@ public class LoaderManger {
 
 					Class clazz = urlClassLoader.loadClass(className);
 
+					// if (!clazz.isInterface()) {
+					// registerBean(clazz);
+					// }
+
 					Annotation[] annotationArray = clazz.getDeclaredAnnotations();
 
 					for (Annotation annotation : annotationArray) {
 						// 判断是否是spring bean对象再注册
 						if (annotation instanceof Repository || annotation instanceof Service || annotation instanceof Controller
-								|| annotation instanceof Component || annotation instanceof Entity) {
-							registerBean(clazz);
+								|| annotation instanceof Component) {
+							String handlerName = registerBean(clazz);
+							if (handlerName != null) {
+								handlerBeanName.add(handlerName);
+							}
 						}
 					}
 
@@ -114,7 +148,17 @@ public class LoaderManger {
 
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("{}", e);
+		}
+
+		AbstractApplicationContext applicationContext = Application.getInstance().getApplicationContext();
+		for (String className : handlerBeanName) {
+			IMessageHandler msgHandler = (IMessageHandler) applicationContext.getBean(className);
+
+			if (msgHandler != null) {
+				BaseMsgDispatcher.messageHandler.put(msgHandler.getHandlerName(), msgHandler);
+				logger.info("动态加载业务:{}", msgHandler.getHandlerName());
+			}
 		}
 
 	}
@@ -124,7 +168,7 @@ public class LoaderManger {
 	 * 
 	 * @param clazz
 	 */
-	public static void registerBean(Class clazz) {
+	public static String registerBean(Class clazz) {
 		AbstractApplicationContext applicationContext = Application.getInstance().getApplicationContext();
 
 		DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory();
@@ -140,82 +184,44 @@ public class LoaderManger {
 
 		// String className = clazz.getSimpleName().substring(0, 1).toLowerCase() + clazz.getSimpleName().substring(1);
 		String className = clazz.getSimpleName();
-		logger.info(className);
+		logger.info("注册 bean:{} 到spring 容器", className);
+
+		if (beanFactory.containsBean(className)) {
+			beanFactory.removeBeanDefinition(className);
+		}
+
 		// 注册
 		beanFactory.registerBeanDefinition(className, messageSourceDefinition);
 		// 获取
 		// ResourceBundleMessageSource messageSource = (ResourceBundleMessageSource) applicationContext.getBean("ResourceBundleMessageSource");
 		// 测试
 		// System.out.println(messageSource.getMessage("test", null, null));
+
+		try {
+			if (!clazz.isInterface()) {
+				Object obj = clazz.newInstance();
+				if (obj instanceof IMessageHandler) {
+					return className;
+				}
+				obj = null;
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("{}", e);
+		}
+		return null;
 	}
 
 	protected static URLClassLoader urlClassLoader = null;
 
-	public static void loadJar() {
+	 
 
-		try {
-			File file = new File("C:\\Users\\tank\\Desktop\\jar\\service.jar");
-			URL url = file.toURI().toURL();
+	@Override
+	public void onApplicationEvent(ApplicationAfterStartEvent event) {
+		loadSdkJar();// 加载JAR
 
-			urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-			addUrl(url);
-			// urlClassLoader = new URLClassLoader(new URL[] { url });
-
-			parseJarClass(file.getPath());
-			// 这里只能用接口接收，不然会报错
-			IUserService service = (IUserService) Application.getInstance().getApplicationContext().getBean("UserServiceImpl");
-
-			User user = service.login("aaa", "123");
-
-			logger.info("用户ID：{},用户名：{}", user.getId(), user.getName());
-
-			// Class clazz = urlClassLoader.loadClass("tank.meme.service.impl.UserServiceImpl");
-			//
-			// Object obj = clazz.newInstance();
-			//
-			// Method login = clazz.getMethod("login", String.class, String.class);
-			//
-			// System.out.println(login.invoke(obj, "aaa", "123"));
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
-	public static void loadServiceJar() {
-
-		try {
-			File file = new File("E:\\eclipse-workspace\\service\\target\\setting-service-0.0.1.jar");
-			URL url = file.toURI().toURL();
-
-			urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-			addUrl(url);
-			// urlClassLoader = new URLClassLoader(new URL[] { url });
-
-			parseJarClass(file.getPath());
-			// 这里只能用接口接收，不然会报错
-			Object service = Application.getInstance().getApplicationContext().getBean("SettingServiceImpl");
-
-			Method method = service.getClass().getMethod("loadEntity", String.class);
-			Object data = method.invoke(service, "aaa");
-
-			logger.info("调用返回结果:{}", data);
-
-			// Class clazz = urlClassLoader.loadClass("tank.meme.service.impl.UserServiceImpl");
-			//
-			// Object obj = clazz.newInstance();
-			//
-			// Method login = clazz.getMethod("login", String.class, String.class);
-			//
-			// System.out.println(login.invoke(obj, "aaa", "123"));
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+		new LoaderTimer().start();// 监听JAR，并及时更新
 	}
 
 }

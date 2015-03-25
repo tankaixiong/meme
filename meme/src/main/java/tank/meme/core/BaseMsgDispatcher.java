@@ -21,16 +21,18 @@ import tank.meme.core.event.ApplicationAfterStartEvent;
  * @description:
  * @version :0.1
  */
-@Component
 public class BaseMsgDispatcher implements ApplicationListener<ApplicationAfterStartEvent> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BaseMsgDispatcher.class);
 
-	protected static final int POOL_SIZE = Application.getInstance().getThreadNum();
-
-	protected Map<String, IMessageHandler> messageHandler = new HashMap<String, IMessageHandler>();
+	public static Map<String, IMessageHandler> messageHandler = new HashMap<String, IMessageHandler>();
 
 	protected ExecutorService pool;
+	private static boolean isInited = false;
+
+	public BaseMsgDispatcher() {
+
+	}
 
 	public boolean isDefaultMsgType() {
 		String queueType = Application.getInstance().getProperties().getString(ApplicationProperties.MSG_QUEUE_TYPE);
@@ -50,22 +52,29 @@ public class BaseMsgDispatcher implements ApplicationListener<ApplicationAfterSt
 
 	@Override
 	public void onApplicationEvent(ApplicationAfterStartEvent event) {
-		LOGGER.info("初始化所有handler");
+		if (!isInited) {
+			LOGGER.info("初始化所有handler");
 
-		Map<String, IMessageHandler> handlers = Application.getInstance().getApplicationContext().getBeansOfType(IMessageHandler.class);
-		Iterator<IMessageHandler> handlerIt = handlers.values().iterator();
-		while (handlerIt.hasNext()) {
-			IMessageHandler item = handlerIt.next();
-			LOGGER.trace("act:{},handler:{}", item.getHandlerName(), item.getClass());
-			messageHandler.put(item.getHandlerName(), item);
+			Map<String, IMessageHandler> handlers = Application.getInstance().getApplicationContext().getBeansOfType(IMessageHandler.class);
+			Iterator<IMessageHandler> handlerIt = handlers.values().iterator();
+			while (handlerIt.hasNext()) {
+				IMessageHandler item = handlerIt.next();
+				LOGGER.trace("act:{},handler:{}", item.getHandlerName(), item.getClass());
+				messageHandler.put(item.getHandlerName(), item);
+			}
+			int POOL_SIZE = Application.getInstance().getThreadNum();
+			// 初始化列队消耗线程
+			LOGGER.info("初始化处理队列线程");
+			LOGGER.info("当前线程数:{}", POOL_SIZE);
+			pool = Executors.newFixedThreadPool(POOL_SIZE);
+
+			init();
+			isInited = true;
 		}
+	}
 
-		// 初始化列队消耗线程
-		LOGGER.info("初始化处理队列线程");
-		LOGGER.info("当前线程数:{}", POOL_SIZE);
-		pool = Executors.newFixedThreadPool(POOL_SIZE);
-
-		init();
+	public int getThreadNum() {
+		return Application.getInstance().getThreadNum();
 	}
 
 }

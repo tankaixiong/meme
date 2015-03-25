@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import tank.meme.core.event.LoginEvent;
 import tank.meme.core.event.SessionCloseEvent;
 
 /**

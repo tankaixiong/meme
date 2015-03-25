@@ -6,10 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import tank.meme.cache.RedisSupport;
 import tank.meme.core.net.socket.Request;
 import tank.meme.core.net.socket.SessionManager;
 import tank.meme.core.net.socket.SocketSession;
+import tank.meme.core.redis.RedisSupport;
 import tank.meme.utils.JsonUtils;
 
 /**
@@ -18,9 +18,9 @@ import tank.meme.utils.JsonUtils;
  * @description:基于redis 机制的消息分发
  * @version :1.0
  */
-//@Component
+@Component
 public class RedisMsgDispatcher extends BaseMsgDispatcher {
-	private static final Logger LOGGER = LoggerFactory.getLogger(RedisMsgDispatcher.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RedisMsgDispatcher.class);
 
 	/**
 	 * 读取线程的列队
@@ -28,9 +28,10 @@ public class RedisMsgDispatcher extends BaseMsgDispatcher {
 	@Override
 	public void init() {
 		if (!isDefaultMsgType()) {
-			LOGGER.info("当前线程数:{}", POOL_SIZE);
+			int threadNum=getThreadNum();
+			LOG.info("当前线程数:{}", threadNum);
 
-			for (int i = 0; i < POOL_SIZE; i++) {
+			for (int i = 0; i < threadNum; i++) {
 				pool.execute(new MsgBee(i));
 			}
 		}
@@ -62,15 +63,19 @@ public class RedisMsgDispatcher extends BaseMsgDispatcher {
 							SocketSession session = SessionManager.getInstance().getSession(sessionId);
 
 							IMessageHandler handler = messageHandler.get(request.getAct());
-							handler.handler(session, request);
+							if (handler != null) {
+								handler.handler(session, request);
+							} else {
+								LOG.error("没有找到相应的处理handler:{}", request.getAct());
+							}
 
 						}
 					} catch (Exception e) {
-						LOGGER.error("{}", e);
+						LOG.error("{}", e);
 					}
 				}
 			} catch (Exception e) {
-				LOGGER.error("{}", e);
+				LOG.error("{}", e);
 			}
 
 		}

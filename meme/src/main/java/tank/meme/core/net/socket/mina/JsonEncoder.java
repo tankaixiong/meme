@@ -45,7 +45,8 @@ public class JsonEncoder implements ProtocolEncoder {
 			
 			// byte bytes[] = compress(session, responseJson.getBytes("UTF-8"));
 			// // 压缩数据
-			byte bytes[] = GzipUtils.compress(responseJson.getBytes("UTF-8")); // 压缩数据
+			//byte bytes[] = GzipUtils.compress(responseJson.getBytes("UTF-8")); // 压缩数据
+			byte bytes[] = GzipUtils.jzlib(responseJson.getBytes("UTF-8")); // 压缩数据
 			
 			int dataLength = bytes.length;
 			buffer = IoBuffer.allocate(dataLength + 8, false);// 这个长度是前面8个字节

@@ -1,4 +1,4 @@
-package tank.meme.cache;
+package tank.meme.core.redis;
 
 import java.io.IOException;
 import java.io.InputStream;

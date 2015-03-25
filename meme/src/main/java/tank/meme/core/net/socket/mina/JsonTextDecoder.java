@@ -86,7 +86,8 @@ public class JsonTextDecoder extends CumulativeProtocolDecoder {
 							// 解密
 							byte[] unencrypt = EncryptUtils.encrypt(data);
 							// 解压缩
-							byte[] uncompass = GzipUtils.uncompress(unencrypt);
+							//byte[] uncompass = GzipUtils.uncompress(unencrypt);
+							byte[] uncompass = GzipUtils.unjzlib(unencrypt);
 
 							if (uncompass != null) {
 								String jsonStr = new String(uncompass, "UTF-8");
