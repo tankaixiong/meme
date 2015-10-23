@@ -1,0 +1,41 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Insert title here</title>
+	<script type="text/javascript" src="js/lib/jquery.min.js"></script>
+	<script type="text/javascript">
+	$(function(){
+		$('a[data-test]').click(function(){
+			var array=[{"act":"sensor","data":"00156dac0892,A,ff:ff:ff:ff:ff:ff,-80,235,ec:88:8f:7f:28:bc,B,TEST,9","seq":"0000001"}];
+			console.log(array);
+
+			$.post("http://127.0.0.1:8888/test?name=John&time=2pm",function(msg){
+			//$.post("http://127.0.0.1:8888/test", JSON.stringify(array),function(msg){
+			//$.post("http://127.0.0.1:8888/test", { name: "John", time: "2pm" },function(msg){
+				   	 //  if(msg&&msg.err==0){
+				   		// alert('上传数据成功!');
+				   	 //  }else{
+				   		// alert('上传数据失败!');
+				   	 //  }
+				      console.log(msg);
+				    
+			});
+
+
+		 
+
+
+
+
+		});
+
+	});
+
+</script>
+</head>
+<body>
+	<a href="javascript:;" data-test >测试</a>
+</body>
+</html>
