@@ -17,6 +17,8 @@ public class TestMain {
 		Date date= sdf.parse("2009-09-15 00:00:00");
 		
 		System.out.println(date.getTime());
+		
+		System.out.println("测试编码");
 	}
 
 }
