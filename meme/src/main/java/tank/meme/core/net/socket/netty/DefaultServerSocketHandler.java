@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * @author tank
  * @email kaixiong.tan@qq.com
  * @date:2015年10月29日 下午2:13:59
- * @description:
+ * @description:TODO:心跳机制，断线重连，IP白名单，黑名单,安全验证handler，json格式的编码解码
  * @version :0.1
  */
 
@@ -31,13 +31,12 @@ public class DefaultServerSocketHandler extends ChannelHandlerAdapter {
 		 
 		super.channelActive(ctx);
 		
-		ctx.channel().parent().localAddress();
 	}
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		// super.channelRead(ctx, msg);
-		
+		 
 		SocketAddress address=ctx.channel().remoteAddress();
 		LOG.info("{}",address);
 

@@ -12,6 +12,10 @@ import java.util.Date;
  */
 public class TestMain {
 	
+	/**
+	 * @param args
+	 * @throws ParseException
+	 */
 	public static void main(String[] args) throws ParseException {
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date date= sdf.parse("2009-09-15 00:00:00");
@@ -19,6 +23,9 @@ public class TestMain {
 		System.out.println(date.getTime());
 		
 		System.out.println("测试编码");
+		
+		int a=0xABEF;
+		System.out.println(a);
 	}
 
 }
